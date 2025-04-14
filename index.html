@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT 강의자료 PDF 변환기 (개선 버전)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        /* --- 기본 스타일 (이전과 동일) --- */
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        h2 {
+             margin-top: 30px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button#savePdfButton {
+            background-color: #2ecc71;
+        }
+        button#savePdfButton:hover {
+            background-color: #27ae60;
+        }
+        .button-group {
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* --- 프롬프트 영역 스타일 (이전과 동일) --- */
+        .prompt-section {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #bdc3c7;
+            margin-top: 30px;
+        }
+        .prompt-item {
+            background-color: #ffffff;
+            padding: 15px;
+            border: 1px solid #dcdcdc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .prompt-item:last-child {
+            margin-bottom: 0;
+        }
+        .prompt-text {
+            white-space: pre-wrap; /* 줄바꿈 및 공백 유지 */
+            word-wrap: break-word; /* 긴 단어 자동 줄바꿈 */
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #34495e;
+            margin-bottom: 10px; /* 복사 버튼과의 간격 */
+            /* 스크롤바 필요시 */
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+            z-index: 1; /* 스크롤바 위에 보이도록 */
+        }
+         .copy-button:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* --- 미리보기 영역 스타일 (이전과 동일) --- */
+        #previewArea {
+            border: 1px dashed #ccc; /* 시각적 구분을 위한 테두리 */
+            padding: 20px; /* 내부 여백 (PDF에는 영향 안 줌) */
+            margin-top: 20px;
+            background-color: #fdfdfd;
+        }
+        #pdfContentWrapper {
+             min-height: 50px;
+        }
+
+        /* --- 미리보기 내 요소 스타일 (이전과 동일) --- */
+        #pdfContentWrapper img {
+             max-width: 100%;
+             height: auto;
+        }
+        #pdfContentWrapper table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+        #pdfContentWrapper th, #pdfContentWrapper td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+         #pdfContentWrapper th {
+            background-color: #f2f2f2;
+         }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GPT 강의자료 PDF 변환기 (개선 버전)</h1>
+        <p>GPT를 이용하여 생성한 강의자료 HTML 코드를 아래에 붙여넣고 'PDF 저장' 버튼을 클릭하세요.</p>
+
+        <div class="prompt-section">
+             <h2>📋 추천 GPT 프롬프트</h2>
+
+             <div class="prompt-item">
+                 <h3>일반 프롬프트 템플릿 (수정하여 사용하세요)</h3>
+                 <button class="copy-button" data-target="generalPromptText">템플릿 복사</button>
+                 <pre id="generalPromptText" class="prompt-text">
+### Role & Persona
+
+당신은 **[과목]** 분야의 최고 수준 전문가이자 강의 내용 시각화 전문가입니다. 사용자가 제공하는 학습 자료(예: 강의 녹취록, 교재, 노트 필기 등)를 바탕으로 해당 내용을 효과적으로 시각화하여 학습 효과를 극대화하는 역할을 수행합니다.
+
+### Context & Goal
+
+사용자는 현재 **[상황 예: 대학교, 온라인 강의, 스터디 그룹 등]**에서 **[과목]** 강의(또는 학습 과정)를 이수하고 있습니다. 이 과정은 **[강의 특징 예: 특정 교재 중심, 강의 자료 부족, 실습 위주 등]**의 특징을 가지고 있습니다.
+
+사용자의 목표는 제공되는 **[제공 자료 종류 예: 강의 녹취록, 교재 PDF, 발표 자료, 노트 필기]** 를 활용하여, 학습 내용을 명확하게 시각화하고 정리함으로써 **[학습 목표 예: 시험 대비, 개념 이해 증진, 발표 준비, 복습 효율 증대]** 를 달성하는 것입니다.
+
+### Instructions
+
+1.  **자료 검토 및 핵심 파악:** 우선적으로 제공된 **[제공 자료 종류]** 전체를 검토합니다. 특히 **[주요 자료 예: 교재, 공식 강의자료]** 를 중심으로 내용을 파악하고, **[보조 자료 예: 녹취록, 노트 필기, 관련 아티클]** 를 참고하여 학습 내용의 흐름, 강조점, 핵심 개념들을 정확히 파악합니다.
+
+2.  **시각화 구성:** 파악된 내용을 바탕으로 학습 효과를 높일 수 있도록 시각화를 진행합니다. 강의 또는 학습 자료에서 중요하게 다루어진 내용을 핵심 줄기로 삼고, **[보충 자료 예: 교재 상세 내용, 관련 예시, 참고 논문 요약]** 등을 활용하여 설명을 풍부하게 보충합니다. 순서도, 표, 목록, 강조(볼드, 밑줄 등) 등을 적절히 활용하여 가독성을 높입니다.
+
+3.  **결과물 수준 및 범위:** 시각화된 자료는 그 자체만으로도 사용자가 설정한 **[학습 목표]** 를 달성하는 데 충분해야 합니다. 학습 범위 내의 주요 내용을 명확하고 체계적으로 포괄해야 합니다.
+
+4.  **출력 형식:** 최종 결과물은 **하나의 HTML 코드**로 깔끔하게 정리하여 제공합니다. **[스타일링 요구사항 예: 별도의 CSS 없이 순수 HTML 구조만 / 기본적인 CSS 스타일링 포함 / 특정 스타일 가이드 준수]** 에 맞춰 작성해주세요.
+
+### 요청
+
+자, 이제 사용자가 제공할 **[제공 자료 종류]** 를 바탕으로 위 요구사항에 맞춰 내용 시각화를 진행해 주십시오.
+                 </pre>
+             </div>
+
+             <div class="prompt-item">
+                 <h3>헌법학 프롬프트 예시</h3>
+                 <button class="copy-button" data-target="specificPromptText">예시 복사</button>
+                 <pre id="specificPromptText" class="prompt-text">
+### Role & Persona
+
+당신은 세계 최고 수준의 헌법학 교수이자 강의 시각화 전문가입니다. 강의 속기본, 교재, 강의 자료 등을 제공 받아 사용자에게 해당 강의를 시각화하여 제공하세요.
+
+### Context & Goal
+
+현재 사용자는 대학교에서 '헌법학' 강의를 수강하고 있습니다. 해당 강의는 교재의 내용을 중심으로, 교수님이 강연하듯 진행하시는 수업이라 특별한 강의 자료나 정리본이 존재하지는 않습니다. 따라서 강의 속기본과 교재 PDF를 가지고 해당 수업을 시각화하여 학습에 용이하도록 하는 것이 최종 목적입니다.
+
+### Instructions
+
+1. 우선적으로 교재의 내용을 검토합니다.
+2. 검토한 교재의 내용을 기반으로 강의 속기본을 살펴 보면서 수업의 진행 양상을 파악합니다.
+3. 이제 시각화를 진행합니다. 이때, 강의에서 언급한 내용을 핵심 줄기로 삼고 교재의 내용을 통해 설명을 보충합니다.
+4. 시각화된 자료만 보더라도 초고난도 논술형 시험에 대비할 수 있어야 하며, 강의에서 진행된 모든 내용을 포괄해야 합니다.
+5. 최종 결과물은 하나의 HTML 코드로 제시합니다. 현재 첨부된 PDF 파일은 그 예시입니다.
+
+자, 다음 채팅에서 사용자에게 강의 속기본과 교재 PDF 제공 받아 시각화를 진행해주세요.
+                 </pre>
+             </div>
+
+        </div>
+
+        <h2>📝 HTML 코드 입력창</h2>
+        <textarea id="htmlInput" placeholder="여기에 GPT가 생성한 HTML 코드를 붙여넣으세요..."></textarea>
+
+        <div class="button-group">
+            <button id="previewButton">🔄 미리보기 업데이트</button>
+            <button id="savePdfButton">📄 PDF 저장</button>
+        </div>
+
+        <h2>📄 실시간 미리보기 / PDF 변환 영역</h2>
+        <div id="previewArea">
+             <div id="pdfContentWrapper">
+                 <p>HTML 코드를 입력하고 '미리보기 업데이트' 버튼을 누르면 여기에 내용이 표시됩니다.</p>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM 요소 가져오기 (이전과 동일)
+        const htmlInputElement = document.getElementById('htmlInput');
+        const previewButton = document.getElementById('previewButton');
+        const savePdfButton = document.getElementById('savePdfButton');
+        const previewArea = document.getElementById('previewArea');
+        const pdfContentWrapper = document.getElementById('pdfContentWrapper');
+        const copyButtons = document.querySelectorAll('.copy-button');
+
+        // 1. 프롬프트 복사 기능 (이전과 동일)
+        copyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target');
+                const textElement = document.getElementById(targetId);
+                if (textElement) {
+                    const textToCopy = textElement.innerText;
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        alert('프롬프트가 클립보드에 복사되었습니다!');
+                    }).catch(err => {
+                        console.error('복사 실패:', err);
+                        alert('프롬프트 복사에 실패했습니다.');
+                    });
+                } else {
+                    console.error('복사할 텍스트 요소를 찾을 수 없습니다:', targetId);
+                }
+            });
+        });
+
+        // 2. 미리보기 업데이트 기능 (이전과 동일)
+        previewButton.addEventListener('click', () => {
+            const htmlContent = htmlInputElement.value;
+            pdfContentWrapper.innerHTML = htmlContent;
+        });
+
+        // 3. PDF 저장 기능 (이전과 동일)
+        savePdfButton.addEventListener('click', () => {
+            const element = pdfContentWrapper;
+            const htmlContent = htmlInputElement.value;
+            element.innerHTML = htmlContent;
+
+            if (!element.innerText.trim() && !element.querySelector('img')) {
+                alert('PDF로 변환할 내용이 없습니다. HTML 코드를 입력하거나 확인해주세요.');
+                return;
+            }
+
+            const opt = {
+              margin:       [10, 10, 10, 10],
+              filename:     'gpt_lecture_material_v2.pdf',
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  {
+                                scale: 2,
+                                useCORS: true,
+                                scrollY: 0
+                            },
+              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            setTimeout(() => {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    // console.log("PDF 저장 성공");
+                }).catch(err => {
+                    console.error("PDF 생성 오류:", err);
+                    alert("PDF 생성 중 오류가 발생했습니다. 렌더링할 수 없는 복잡한 요소가 포함되었거나 다른 문제가 있을 수 있습니다. 콘솔을 확인해주세요.");
+                });
+            }, 100);
+        });
+
+    </script>
+</body>
+</html>
