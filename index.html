@@ -22,20 +22,20 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        /* --- 2. Gemini 추천 섹션 스타일 추가 --- */
+        /* --- Gemini 추천 섹션 스타일 --- */
         .recommendation-box {
-            background-color: #eaf4ff; /* 연한 파란색 배경 */
-            border: 1px solid #b3d7ff; /* 연한 파란색 테두리 */
+            background-color: #eaf4ff;
+            border: 1px solid #b3d7ff;
             padding: 15px;
-            margin-bottom: 20px; /* 아래 요소와의 간격 */
+            margin-bottom: 20px;
             border-radius: 5px;
-            display: flex; /* Flexbox 레이아웃 사용 */
-            justify-content: space-between; /* 양쪽 끝 정렬 */
-            align-items: center; /* 수직 중앙 정렬 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .recommendation-box p {
             margin: 0;
-            color: #0056b3; /* 진한 파란색 텍스트 */
+            color: #0056b3;
             font-weight: bold;
         }
         .gemini-button {
@@ -50,14 +50,14 @@
         .gemini-button:hover {
             background-color: #0056b3;
         }
-        /* --- 나머지 스타일 (이전과 유사) --- */
+        /* --- 나머지 스타일 --- */
         h1, h2 {
             color: #2c3e50;
             border-bottom: 2px solid #ecf0f1;
             padding-bottom: 10px;
             margin-top: 0;
         }
-        h1 { margin-top: 15px; } /* 제목 위 간격 조정 */
+        h1 { margin-top: 15px; }
         h2 {
              margin-top: 30px;
         }
@@ -96,9 +96,8 @@
         button#savePdfButton:hover {
             background-color: #27ae60;
         }
-        /* --- 3. 초기화 버튼 스타일 추가 --- */
         button#clearButton {
-            background-color: #e67e22; /* 주황색 계열 */
+            background-color: #e67e22;
         }
         button#clearButton:hover {
             background-color: #d35400;
@@ -128,13 +127,12 @@
             margin-bottom: 0;
         }
         .prompt-text {
-            white-space: pre-wrap; /* 줄바꿈 및 공백 유지 */
-            word-wrap: break-word; /* 긴 단어 자동 줄바꿈 */
+            white-space: pre-wrap;
+            word-wrap: break-word;
             font-family: monospace;
             font-size: 0.9em;
             color: #34495e;
-            margin-bottom: 10px; /* 복사 버튼과의 간격 */
-            /* 스크롤바 필요시 */
+            margin-bottom: 10px;
             max-height: 400px;
             overflow-y: auto;
         }
@@ -149,7 +147,7 @@
             border-radius: 3px;
             cursor: pointer;
             font-size: 0.8em;
-            z-index: 1; /* 스크롤바 위에 보이도록 */
+            z-index: 1;
         }
          .copy-button:hover {
             background-color: #7f8c8d;
@@ -157,8 +155,8 @@
 
         /* --- 미리보기 영역 스타일 --- */
         #previewArea {
-            border: 1px dashed #ccc; /* 시각적 구분을 위한 테두리 */
-            padding: 20px; /* 내부 여백 (PDF에는 영향 안 줌) */
+            border: 1px dashed #ccc;
+            padding: 20px;
             margin-top: 20px;
             background-color: #fdfdfd;
         }
@@ -185,12 +183,44 @@
             background-color: #f2f2f2;
         }
 
+        /* --- !!! PDF 페이지 나누기 제어 CSS 추가 !!! --- */
+        @media print {
+            h1, h2, h3, h4, h5, h6 {
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+            p, blockquote, ul, ol, li {
+                page-break-inside: avoid;
+            }
+            table, figure, img {
+                page-break-inside: avoid;
+            }
+            .page-break-before { page-break-before: always; }
+            .page-break-after { page-break-after: always; }
+            .avoid-break { page-break-inside: avoid; }
+        }
+        /* html2pdf가 @media print 외부 규칙도 인식 시도하므로 중복 정의 */
+        h1, h2, h3, h4, h5, h6 {
+            page-break-after: avoid;
+            page-break-inside: avoid;
+        }
+        p, blockquote, ul, ol, li {
+            page-break-inside: avoid;
+        }
+        table, figure, img {
+            page-break-inside: avoid;
+        }
+        .page-break-before { page-break-before: always; }
+        .page-break-after { page-break-after: always; }
+        .avoid-break { page-break-inside: avoid; }
+        /* --- 페이지 나누기 CSS 끝 --- */
+
     </style>
 </head>
 <body>
     <div class="container">
         <div class="recommendation-box">
-            <p>✨ Gemini 2.5 Pro (experimental) 모델을 가장 추천합니다. (무료로도 이용 가능)</p>
+            <p>✨ Gemini 2.5 Pro (experimental) 모델을 가장 추천합니다.</p>
             <a href="https://gemini.google.com/app" target="_blank" class="gemini-button">Gemini 바로가기</a>
         </div>
 
@@ -199,7 +229,6 @@
 
         <div class="prompt-section">
              <h2>📋 추천 프롬프트</h2>
-
              <div class="prompt-item">
                  <h3>일반 프롬프트 템플릿 (수정하여 사용하세요)</h3>
                  <button class="copy-button" data-target="generalPromptText">템플릿 복사</button>
@@ -225,6 +254,7 @@
 
 4.  **출력 형식:** 최종 결과물은 **하나의 HTML 코드**로 깔끔하게 정리하여 제공합니다.
 **[스타일링 요구사항 예: 별도의 CSS 없이 순수 HTML 구조만 / 기본적인 CSS 스타일링 포함 / 특정 스타일 가이드 준수]** 에 맞춰 작성해주세요.
+**PDF 변환 시 페이지 나누기가 자연스럽도록 CSS의 page-break 속성(예: page-break-inside: avoid;)을 주요 요소(제목, 문단, 표, 이미지 등)에 적용해주세요.**
 ### 요청
 
 자, 이제 사용자가 제공할 **[제공 자료 종류]** 를 바탕으로 위 요구사항에 맞춰 내용 시각화를 진행해 주십시오.
@@ -249,11 +279,10 @@
 2. 검토한 교재의 내용을 기반으로 강의 속기본을 살펴 보면서 수업의 진행 양상을 파악합니다.
 3. 이제 시각화를 진행합니다. 이때, 강의에서 언급한 내용을 핵심 줄기로 삼고 교재의 내용을 통해 설명을 보충합니다.
 4. 시각화된 자료만 보더라도 초고난도 논술형 시험에 대비할 수 있어야 하며, 강의에서 진행된 모든 내용을 포괄해야 합니다.
-5. 최종 결과물은 하나의 HTML 코드로 제시합니다. 현재 첨부된 PDF 파일은 그 예시입니다.
+5. 최종 결과물은 하나의 HTML 코드로 제시합니다. **특히, 생성된 HTML을 PDF로 변환했을 때 내용이 어색하게 잘리지 않도록 중요한 요소(제목, 문단, 표, 이미지 등)에 CSS `page-break-inside: avoid;` 스타일을 적용해주세요.**
 자, 다음 채팅에서 사용자에게 강의 속기본과 교재 PDF 제공 받아 시각화를 진행해주세요.
 </pre>
              </div>
-
         </div>
 
         <h2>📝 HTML 코드 입력창</h2>
@@ -264,7 +293,6 @@
             <button id="savePdfButton">📄 PDF 저장</button>
             <button id="clearButton">🗑️ 입력 초기화</button>
         </div>
-
 
         <h2>📄 실시간 미리보기 / PDF 변환 영역</h2>
         <div id="previewArea">
@@ -282,8 +310,8 @@
         const previewArea = document.getElementById('previewArea');
         const pdfContentWrapper = document.getElementById('pdfContentWrapper');
         const copyButtons = document.querySelectorAll('.copy-button');
-        const clearButton = document.getElementById('clearButton'); // 3. 초기화 버튼 요소 가져오기
-        const initialPreviewText = '<p>HTML 코드를 입력하고 \'미리보기 업데이트\' 버튼을 누르면 여기에 내용이 표시됩니다.</p>'; // 미리보기 초기 상태 저장
+        const clearButton = document.getElementById('clearButton');
+        const initialPreviewText = '<p>HTML 코드를 입력하고 \'미리보기 업데이트\' 버튼을 누르면 여기에 내용이 표시됩니다.</p>';
 
         // 1. 프롬프트 복사 기능
         copyButtons.forEach(button => {
@@ -310,46 +338,57 @@
             pdfContentWrapper.innerHTML = htmlContent;
         });
 
-        // 3. PDF 저장 기능
+        // 3. PDF 저장 기능 (페이지 나누기 옵션 추가)
         savePdfButton.addEventListener('click', () => {
             const element = pdfContentWrapper;
             const htmlContent = htmlInputElement.value;
-            // PDF 저장 시에는 미리보기 업데이트를 내부적으로 수행
-            element.innerHTML = htmlContent;
+            element.innerHTML = htmlContent; // 미리보기 업데이트 선행
 
+            // 변환할 내용 유무 확인 강화
             if (!element.innerText.trim() && !element.querySelector('img') && !element.querySelector('table')) {
                 alert('PDF로 변환할 내용이 없습니다. HTML 코드를 입력하거나 확인해주세요.');
                 return;
             }
 
+            // --- !!! html2pdf 옵션 수정 !!! ---
             const opt = {
-              margin:       [10, 10, 10, 10], // 여백 [상, 좌, 하, 우] mm
-              filename:     'lecture_material.pdf', // 파일 이름
-              image:        { type: 'jpeg', quality: 0.98 }, // 이미지 품질
+              margin:       [10, 10, 10, 10], // 여백 mm [상, 좌, 하, 우]
+              filename:     'lecture_material.pdf', // 저장될 PDF 파일 이름
+              image:        { type: 'jpeg', quality: 0.98 }, // 이미지 설정
               html2canvas:  {
-                                scale: 2, // 렌더링 해상도 배율
+                                scale: 2, // 해상도 배율
                                 useCORS: true, // 외부 이미지 로드 허용
-                                scrollY: 0 // 스크롤 위치 고정 (전체 페이지 캡처 위해)
+                                scrollY: 0 // 전체 페이지 캡처 위해 스크롤 위치 고정
                             },
-              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } // PDF 설정
+              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }, // PDF 문서 설정
+              // --- 페이지 나누기 옵션 추가 ---
+              pagebreak:    {
+                                mode: ['css', 'avoid-all'], // CSS 규칙 + 요소 내부 잘림 방지 시도
+                                before: '.page-break-before', // 이 클래스 앞에서 강제 페이지 나누기
+                                after: '.page-break-after',   // 이 클래스 뒤에서 강제 페이지 나누기
+                                avoid: 'h1, h2, h3, h4, h5, h6, p, blockquote, ul, ol, li, table, figure, img, .avoid-break' // 이 요소들 내부에서는 페이지 나누기 방지 시도
+                            }
+              // --- 옵션 추가 끝 ---
             };
+            // --- 옵션 수정 끝 ---
 
-            // html2pdf 실행 (렌더링 시간 고려하여 약간의 지연 추가)
+
+            // pdf 생성 (렌더링 시간 고려하여 약간의 지연 추가)
             setTimeout(() => {
                 html2pdf().set(opt).from(element).save().then(() => {
-                    // 성공 시 특별한 동작 없음
+                    // console.log("PDF 저장 성공"); // 성공 로그 (필요시 주석 해제)
                 }).catch(err => {
                     console.error("PDF 생성 오류:", err);
-                    alert("PDF 생성 중 오류가 발생했습니다. 콘솔을 확인해주세요.");
+                    alert("PDF 생성 중 오류가 발생했습니다. 내용이 너무 복잡하거나 지원되지 않는 형식이 포함되었을 수 있습니다. 콘솔을 확인해주세요.");
                 });
-            }, 100);
+            }, 100); // 0.1초 지연
         });
 
-        // 4. 입력 초기화 기능 (새로 추가)
+        // 4. 입력 초기화 기능
         clearButton.addEventListener('click', () => {
-            htmlInputElement.value = ''; // 텍스트 영역 비우기
-            pdfContentWrapper.innerHTML = initialPreviewText; // 미리보기 영역 초기화
-            alert('HTML 입력 내용이 초기화되었습니다.'); // 사용자 알림
+            htmlInputElement.value = '';
+            pdfContentWrapper.innerHTML = initialPreviewText;
+            alert('HTML 입력 내용이 초기화되었습니다.');
         });
 
     </script>
