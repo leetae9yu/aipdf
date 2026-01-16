@@ -70,18 +70,19 @@
 
         .actions {
             display: flex;
-            gap: 12px;
+            gap: 8px; /* 버튼 간격 조정 */
         }
 
         button {
             border: none;
-            padding: 12px 20px;
+            padding: 10px 16px; /* 버튼 크기 살짝 조정 */
             border-radius: 8px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             font-family: inherit;
+            white-space: nowrap;
         }
 
         .btn-primary {
@@ -101,6 +102,12 @@
 
         .btn-secondary:hover {
             background-color: var(--grey-200);
+        }
+        
+        /* 툴팁 효과 */
+        .btn-secondary.copied {
+            background-color: var(--grey-700);
+            color: var(--white);
         }
 
         /* Main Workspace */
@@ -278,6 +285,7 @@
             header { padding: 1rem; }
             .logo { font-size: 1rem; }
             #preview-container { padding: 1rem; }
+            .actions { gap: 4px; overflow-x: auto; }
         }
     </style>
 </head>
@@ -288,6 +296,10 @@
             <span>DOC</span> CONVERTER
         </div>
         <div class="actions">
+            <!-- New Buttons -->
+            <button class="btn-secondary" onclick="window.open('https://gemini.google.com', '_blank')">Gemini 열기</button>
+            <button class="btn-secondary" id="btn-copy-prompt" onclick="copyPrompt()">프롬프트 복사</button>
+            <!-- Existing Buttons -->
             <button class="btn-secondary" onclick="clearContent()">초기화</button>
             <button class="btn-primary" onclick="generatePDF()">PDF 다운로드</button>
         </div>
@@ -339,21 +351,18 @@
         const defaultText = `# 환영합니다! 👋
 
 여기는 **Markdown**과 **HTML**을 PDF로 변환해주는 도구입니다.
-왼쪽에 내용을 입력하면 오른쪽에 실시간으로 변환됩니다.
 
-## 주요 기능
-1. **실시간 미리보기**: 입력하는 즉시 결과 확인
-2. **깔끔한 디자인**: Toss 스타일의 미니멀한 UI
-3. **강력한 PDF 변환**: 레이아웃 그대로 PDF로 저장
+1. **'Gemini 열기'**를 눌러 Google Gemini를 켭니다.
+2. **'프롬프트 복사'**를 눌러 강의 스크립트 작성용 프롬프트를 가져옵니다.
+3. Gemini에게 프롬프트를 붙여넣고 자료를 업로드합니다.
+4. Gemini가 만들어준 코드를 여기 붙여넣고 **PDF로 저장**하세요!
 
 ## 예시 코드
 \
 console.log("Hello, World!");
 \
 
-> "단순함이 궁극의 정교함이다." - 레오나르도 다빈치
-
-이제 직접 작성해보세요!`;
+> "단순함이 궁극의 정교함이다." - 레오나르도 다빈치`;
 
         // Set default text
         editor.value = defaultText;
@@ -364,9 +373,6 @@ console.log("Hello, World!");
 
         function render() {
             const rawText = editor.value;
-            // Simple check: if it looks like HTML tags, treat as HTML directly?
-            // For now, let's just parse MD. Marked handles HTML inside MD fine.
-            // Using DOMPurify to sanitize HTML/JS injection for safety.
             const parsed = marked.parse(rawText);
             const clean = DOMPurify.sanitize(parsed);
             preview.innerHTML = clean;
@@ -382,9 +388,8 @@ console.log("Hello, World!");
         function generatePDF() {
             loading.classList.add('active');
 
-            // Options for html2pdf
             const opt = {
-                margin:       [15, 15, 15, 15], // mm (top, left, bottom, right)
+                margin:       [15, 15, 15, 15], 
                 filename:     'document.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
@@ -392,7 +397,6 @@ console.log("Hello, World!");
                 pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
-            // Wait a bit to show loading (UX)
             setTimeout(() => {
                 html2pdf().set(opt).from(preview).save()
                 .then(() => {
@@ -404,6 +408,44 @@ console.log("Hello, World!");
                     loading.classList.remove('active');
                 });
             }, 500);
+        }
+
+        // Improved Prompt Template
+        const scriptPrompt = `# Role
+당신은 세계 최고의 교육 공학 전문가이자 전문 강의 스크립트 라이터입니다.
+
+# Task
+제공된 [수업 속기본(txt)]과 [강의자료(pdf/pptx)]를 완벽하게 통합 분석하여, 해당 수업의 모든 내용을 포괄하는 '강의 대본(Lecture Script)'을 작성해주세요.
+
+# Instructions
+1. **내용 통합**: 속기본의 구어체 표현을 정제된 문어체로 다듬되, 강의자료의 핵심 도표/수식/텍스트 내용을 적절한 위치에 상세히 서술하여 녹여내세요.
+2. **구조화**: 수업의 흐름에 따라 [도입] - [전개] - [심화] - [요약] 등의 논리적 구조를 갖추세요.
+3. **완결성**: 이 스크립트만 읽어도 수업을 듣지 않은 사람이 수업 내용을 100% 이해할 수 있어야 합니다. (누락된 개념이 없도록 주의)
+4. **가독성**: 중요한 개념은 **굵게**, 예시는 *기울임* 등으로 강조하고, 필요하다면 불릿 포인트나 번호 매기기를 사용하세요.
+
+# Output Format
+- 반드시 단일 Markdown 코드 블록으로 출력하세요.
+- 각 섹션은 적절한 헤더(#, ##)로 구분하세요.
+
+Start generating the script now.
+`;
+
+        function copyPrompt() {
+            navigator.clipboard.writeText(scriptPrompt).then(() => {
+                const btn = document.getElementById('btn-copy-prompt');
+                const originalText = btn.innerText;
+                
+                btn.innerText = '복사됨!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('복사 실패:', err);
+                alert('복사에 실패했습니다.');
+            });
         }
     </script>
 </body>
